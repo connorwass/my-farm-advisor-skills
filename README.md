@@ -1,3 +1,137 @@
 # my-farm-advisor-skills
 
-Initial repository skeleton.
+Domain-specific skills for the My Farm Advisor agent ecosystem. This repository holds only the approved My Farm Advisor skill catalog. It depends on reusable Superior Byteworks skills maintained in a separate repository. No Superior Byteworks skills are vendored or copied here.
+
+---
+
+## Purpose
+
+This repository is the canonical home for My Farm Advisor agent skills. It contains the three approved domain skills that power farm planning, breeding trial management, and quantitative trait locus analysis. The repo is kept small and focused: upstream source provenance is recorded for every import, large generated assets are excluded, and reusable cross-cutting skills are treated as external dependencies.
+
+---
+
+## Skill Catalog
+
+| Skill | Path | Description |
+|---|---|---|
+| **my-farm-advisor** | `my-farm-advisor/` | Umbrella skill that coordinates farm data pipelines, dashboard workflows, and shared utilities such as geoadmin spatial data orchestration. |
+| **my-farm-breeding-trial-management** | `my-farm-breeding-trial-management/` | End-to-end breeding trial workflows: design, fieldbook management, germplasm selection, crossing plans, and field trial placement. |
+| **my-farm-qtl-analysis** | `my-farm-qtl-analysis/` | Quantitative trait locus mapping, quality control, population structure analysis, genomic prediction, and reporting. |
+
+### What Is Not Here
+
+The following old My Farm Advisor Superior Byteworks skill copies are explicitly excluded and do not exist in this repository:
+
+- `superior-byte-works-wrighter` (superseded by the canonical Wrighter delivery in `superior-byte-works-skills`)
+- `superior-byte-works-google-timesfm-forecasting` (superseded by the Google-approved TimesFM forecasting skill in `superior-byte-works-skills`)
+
+---
+
+## Dependencies
+
+This repository depends on reusable Superior Byteworks skills, which are **external dependencies installed separately**. They are **not vendored, copied, or mirrored** into this repo.
+
+- **superior-byte-works-skills** — the canonical repository for reusable Superior Byteworks skills such as Wrighter delivery and TimesFM forecasting.
+
+Installation and version requirements for each dependency are documented in the per-skill `SKILL.md` files.
+
+---
+
+## Large Assets
+
+This repository keeps asset hygiene strict. The following policy applies to large or generated spatial data:
+
+- **Geoadmin metadata is preserved.** Source URL metadata and downloader orchestration scripts are committed so the agent can reproduce the data pipeline.
+- **Large GeoJSON payloads are runtime-downloaded, not committed.** The generated `countries.geojson`, `states_usa.geojson`, and county-level GeoJSON outputs are produced at runtime by the downloader scripts and land under `data/my-farm-advisor/shared/geoadmin/`, which is excluded from version control.
+- No generated output directories (`data/`, `.cache/`, build artifacts) are tracked.
+
+For details on running the geoadmin downloader, see `my-farm-advisor/r2-seed-pipeline/src/scripts/ingest/download_geoadmin.py` after the skill is imported.
+
+---
+
+## Import Provenance
+
+Every skill in this repository records its source. The table below summarizes the origin of the three approved imports.
+
+| Skill | Source | Source Path / Local Worktree | Ref / Commit | Baseline / Notes |
+|---|---|---|---|---|
+| my-farm-advisor | `borealBytes/my-farm-advisor` | `skills/my-farm-advisor` | `main` (`4a82ab7`) | Canonical remote source. Geoadmin GeoJSON payloads excluded; metadata and downloader scripts preserved. |
+| my-farm-breeding-trial-management | Local worktree | `/media/clay/Data/dev/scientific-agent-skills-worktrees/scientific-agent-skills-breeding-trial-management/scientific-skills/breeding-trial-management` | Branch `feat/breeding-trial-management` (`f479f5d`) | Local wins as structural base. Backfilled remote-only completeness items from `borealBytes/my-farm-advisor@main:skills/my-farm-breeding-trial-management` (README, CLI script, field-trial-placement examples). |
+| my-farm-qtl-analysis | Local worktree | `/media/clay/Data/dev/scientific-agent-skills-worktrees/scientific-agent-skills-qtl-analysis/scientific-skills/qtl-analysis` | Branch `feat/qtl-analysis` (`f479f5d`) | Local wins as structural base. Backfilled remote-only completeness items from `borealBytes/my-farm-advisor@main:skills/my-farm-qtl-analysis` (README, CLI script, richer SKILL metadata and references). Large/binary asset audit performed before tracking. |
+
+Each skill directory contains a `PROVENANCE.md` with the exact source URL, resolved commit SHA, exclusions, local modifications, and step-by-step reproduction instructions.
+
+---
+
+## Validation
+
+Run the repository validation entrypoint to check that required files, provenance records, and asset policies are intact:
+
+```bash
+# From the repository root
+./scripts/validate.sh
+```
+
+What the validator checks:
+
+- Required skill entrypoints (`SKILL.md`, `README.md`) exist for every skill in the catalog.
+- Import provenance files are present and contain required fields.
+- Forbidden paths (excluded old Superior Byteworks skills, generated `data/` outputs, `node_modules/`, `.cache/`) are absent from the tracked tree.
+- Large asset policy compliance (no unmanaged GeoJSON payloads, no unexpected binary blobs).
+
+If validation fails, the script prints the specific check that failed and exits non-zero.
+
+---
+
+## Update Policy
+
+Skills in this repository are updated from upstream using the following rules:
+
+1. **Umbrella skill (my-farm-advisor)** — synced from `borealBytes/my-farm-advisor@main`. Before updating, verify the remote ref with `git ls-remote https://github.com/borealBytes/my-farm-advisor.git refs/heads/main`, record the resolved commit SHA, and re-apply the geoadmin exclusion list.
+
+2. **Breeding trial and QTL skills** — local worktrees are canonical. When the local worktree advances, re-import from the local path, re-apply remote-only backfill items, and update the provenance commit SHA and dirty-status fields.
+
+3. **Backfill baseline** — the `borealBytes/my-farm-advisor` remote remains a comparison baseline. If the remote gains new completeness items (docs, scripts, examples) that are missing locally, backfill them rather than overwriting local structural improvements.
+
+4. **Dependency skills** — Superior Byteworks skills are never copied into this repo. When they change, update the dependency reference or installation instructions in the affected `SKILL.md` files.
+
+5. **Provenance refresh** — every update must refresh the corresponding `PROVENANCE.md` with the new source ref, commit SHA, date, and any new exclusions or modifications.
+
+---
+
+## Repository Layout
+
+```
+my-farm-advisor-skills/
+├── README.md                          # this file
+├── .gitignore                         # runtime data, caches, generated outputs
+├── .gitattributes                     # LFS policy for required binary assets
+├── scripts/
+│   └── validate.sh                    # repository validation entrypoint
+├── my-farm-advisor/                   # umbrella skill
+│   ├── SKILL.md
+│   ├── README.md
+│   ├── PROVENANCE.md
+│   └── ...
+├── my-farm-breeding-trial-management/ # breeding trial skill
+│   ├── SKILL.md
+│   ├── README.md
+│   ├── PROVENANCE.md
+│   └── ...
+└── my-farm-qtl-analysis/              # QTL analysis skill
+    ├── SKILL.md
+    ├── README.md
+    ├── PROVENANCE.md
+    └── ...
+```
+
+---
+
+## Contributing
+
+When adding or updating a skill:
+
+- Record import provenance before committing the skill tree.
+- Exclude generated outputs and large runtime assets.
+- Run `./scripts/validate.sh` and ensure it passes.
+- Do not vendor Superior Byteworks skills; declare them as external dependencies.
