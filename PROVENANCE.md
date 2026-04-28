@@ -27,7 +27,7 @@ Use the template below for each import. Keep every field present. If a field doe
 2. For authenticated Omni/Wrighter imports, run this precheck before import or refresh:
 
    ```bash
-   git ls-remote git@github.com:borealBytes/omni.git refs/heads/feature/wrighter-delivery
+   git ls-remote https://github.com/borealBytes/omni.git refs/heads/feature/wrighter-delivery
    ```
 
    Record the returned SHA as `source_commit` and keep `source_ref: feature/wrighter-delivery`.
@@ -80,3 +80,19 @@ Use the template below for each import. Keep every field present. If a field doe
 - exclusions: `.git/`; generated geoadmin runtime payloads such as `r2-seed-pipeline/src/shared/geoadmin/l0_countries/countries.geojson`, `r2-seed-pipeline/src/shared/geoadmin/l1_states/states_usa.geojson`, and runtime-parity outputs that are rebuilt under `data/my-farm-advisor/shared/geoadmin/{l0_countries,l1_states,l2_counties}/`; generated maturity report/table artifacts under `r2-seed-pipeline/src/shared/*/{reports,tables}/`; any repo-local CI or deployment files outside `skills/my-farm-advisor/`
 - local_modifications: Imported `skills/my-farm-advisor/` into `my-farm-advisor/` and intentionally kept geoadmin source metadata JSON files while excluding generated geoadmin payloads. The committed metadata records the upstream `source_url`, `archive_name`, `output_geojson`, and `output_parquet` values used by `r2-seed-pipeline/src/scripts/ingest/download_geoadmin.py` to rebuild runtime outputs under `data/my-farm-advisor/shared/geoadmin/{l0_countries,l1_states,l2_counties}/`. Generated maturity report/table artifacts were also omitted while preserving `farm_dashboard.py`, `run_farm_pipeline.py`, and `run_maturity_by_fips.py`.
 - update_procedure: Run `git ls-remote https://github.com/borealBytes/my-farm-advisor.git refs/heads/main`, confirm the SHA, clone or fetch the repo, copy only `skills/my-farm-advisor/` into `my-farm-advisor/`, preserve the geoadmin metadata JSON files, exclude generated geoadmin payloads and runtime copies that belong under `data/my-farm-advisor/shared/geoadmin/{l0_countries,l1_states,l2_counties}/`, exclude generated maturity report/table artifacts under `r2-seed-pipeline/src/shared/*/{reports,tables}/`, rerun `./scripts/validate.sh`, and refresh the QA evidence plus provenance fields in the same commit.
+
+## my-farm-qtl-analysis
+- source_repo: https://github.com/borealBytes/my-farm-advisor.git
+- source_local_path: /media/clay/Data/dev/scientific-agent-skills-worktrees/scientific-agent-skills-qtl-analysis
+- source_ref: feat/qtl-analysis
+- source_commit: f479f5d2d494d12c8b60fbdc338bf1219dd5a0d1
+- source_status: untracked worktree: scientific-skills/qtl-analysis/
+- source_path: scientific-skills/qtl-analysis/
+- destination_path: my-farm-qtl-analysis/
+- import_date: 2026-04-28
+- remote_baseline_ref: main
+- remote_baseline_commit: 4a82ab779e8374035ca5e15f1cb1c0571395dc3d
+- remote_baseline_path: skills/my-farm-qtl-analysis/
+- exclusions: `.git/`; generated `examples/**/output/` artifacts; generated `scripts/output/` artifacts; no unrelated scientific skills outside `scientific-skills/qtl-analysis/`; no remote flattening of the local grouped example taxonomy
+- local_modifications: Imported the local grouped example layout as the structural base, backfilled remote-only `README.md` and `scripts/qtl_cli.py`, merged richer remote SKILL sections without changing example-first behavior, normalized local-source path assumptions to `my-farm-qtl-analysis/`, preserved `scripts/verify_gpu_hpc.py` and `VISUALIZATION_SUMMARY.md`, and excluded generated outputs after asset audit.
+- update_procedure: Re-run `git ls-remote https://github.com/borealBytes/my-farm-advisor.git refs/heads/main`, capture the resolved baseline SHA for `skills/my-farm-qtl-analysis`, re-run `git branch --show-current`, `git rev-parse HEAD`, and `git status --short` in `/media/clay/Data/dev/scientific-agent-skills-worktrees/scientific-agent-skills-qtl-analysis`, copy only `scientific-skills/qtl-analysis/` into `my-farm-qtl-analysis/`, re-apply the remote backfill files and grouped-path normalization, repeat the asset audit, and refresh this provenance record plus `IMPORT_MANIFEST.md` in the same commit.

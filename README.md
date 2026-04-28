@@ -44,7 +44,7 @@ Installation and version requirements for each dependency are documented in the 
 ### 1. Clone This Repository
 
 ```bash
-git clone https://github.com/borealBytes/my-farm-advisor.git my-farm-advisor-skills
+git clone https://github.com/borealBytes/my-farm-advisor-skills.git
 cd my-farm-advisor-skills
 ```
 
