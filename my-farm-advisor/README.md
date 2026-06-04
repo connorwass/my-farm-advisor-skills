@@ -9,7 +9,7 @@ Use this skill when the request is fundamentally about fields, crops, weather, s
 - Routes farm questions into the right operational subtree instead of dumping everything into one giant prompt.
 - Connects field operations, data rebuilds, imagery, soil, weather, and strategy work into one coherent system.
 - Preserves a field-level source of truth so summaries and recommendations stay traceable.
-- Provides both quick guidance docs and deeper playbooks for repeatable farm workflows.
+- Provides both quick guidance docs and scoped agent instructions for repeatable farm workflows.
 - Anchors the farm-specific skill layer that sits on top of upstream OpenClaw.
 
 ## Canonical Farm Data Structure
@@ -131,9 +131,9 @@ High-value pipeline and bootstrap entrypoints include:
 
 The most important high-level orchestration docs are:
 
-- deterministic rebuild contract: [`data-sources/farm-data-rebuild/PLAYBOOK.md`](data-sources/farm-data-rebuild/PLAYBOOK.md)
-- farm reporting pipeline: [`data-sources/farm-intelligence-reporting/PLAYBOOK.md`](data-sources/farm-intelligence-reporting/PLAYBOOK.md)
-- runtime seed/bootstrap behavior: [`r2-seed-pipeline/PLAYBOOK.md`](r2-seed-pipeline/PLAYBOOK.md)
+- deterministic rebuild contract: [`data-sources/farm-data-rebuild/AGENTS.md`](data-sources/farm-data-rebuild/AGENTS.md)
+- farm reporting pipeline: [`data-sources/farm-intelligence-reporting/AGENTS.md`](data-sources/farm-intelligence-reporting/AGENTS.md)
+- runtime seed/bootstrap behavior: [`r2-seed-pipeline/AGENTS.md`](r2-seed-pipeline/AGENTS.md)
 
 ## Shared Resources
 
@@ -174,7 +174,7 @@ The shipped pipeline/runtime docs explicitly support:
 
 - local checkout mode: `data/my-farm-advisor/`
 - volume-backed runtime mode: `/data/workspace/data/my-farm-advisor/`
-- object-storage-backed sync paths such as S3 or R2, with `rsync --no-times` semantics documented for those mounts in [`r2-seed-pipeline/PLAYBOOK.md`](r2-seed-pipeline/PLAYBOOK.md)
+- object-storage-backed sync paths such as S3 or R2, with `rsync --no-times` semantics documented for those mounts in [`r2-seed-pipeline/AGENTS.md`](r2-seed-pipeline/AGENTS.md)
 
 The runtime installer in [`r2-seed-pipeline/README.md`](r2-seed-pipeline/README.md) resolves the writable data root in this order:
 
@@ -189,7 +189,7 @@ That is why this skill can work in local mode, bind-volume mode, and S3/R2-backe
 ```mermaid
 flowchart TD
     accTitle: Farm Skill Routing Overview
-    accDescr: Overview of how the My Farm Advisor umbrella skill routes a farm request into the right operational area and then into guides or playbooks that produce field-ready outputs.
+    accDescr: Overview of how the My Farm Advisor umbrella skill routes a farm request into the right operational area and then into guides or AGENTS instructions that produce field-ready outputs.
 
     request([🌾 Farm request]) --> router[🧭 Umbrella skill router]
 
@@ -206,7 +206,7 @@ flowchart TD
     end
 
     router --> routing_areas
-    routing_areas --> guides[[🗂️ Guide or playbook]]
+    routing_areas --> guides[[🗂️ Guide or AGENTS instructions]]
     guides --> outputs([✅ Field actions, reports, maps, and rebuild steps])
 
     classDef primary fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
@@ -218,7 +218,7 @@ flowchart TD
     class outputs outcome
 ```
 
-The umbrella entrypoint is [`SKILL.md`](SKILL.md). From there, the skill routes into one of the subtree indexes, and then into the actual guide or playbook that does the work.
+The umbrella entrypoint is [`SKILL.md`](SKILL.md). From there, the skill routes into one of the subtree indexes, and then into the actual guide or AGENTS file that does the work.
 
 ## Core Capability Areas
 
@@ -242,7 +242,7 @@ flowchart LR
 
     intake([🌱 Start with the question]) --> choose_area{Choose the right farm area}
     choose_area --> open_index[📂 Open subtree index]
-    open_index --> select_guide[🗂️ Use guide or playbook]
+    open_index --> select_guide[🗂️ Use guide or AGENTS file]
     select_guide --> run_workflow[⚙️ Run analysis or rebuild]
     run_workflow --> produce_output[📦 Produce field-level output]
     produce_output --> share_result([📣 Share recommendation or artifact])
@@ -258,10 +258,10 @@ flowchart LR
 
 Examples:
 
-- "Rebuild the farm from source systems" -> [`data-sources/farm-data-rebuild/PLAYBOOK.md`](data-sources/farm-data-rebuild/PLAYBOOK.md)
+- "Rebuild the farm from source systems" -> [`data-sources/farm-data-rebuild/AGENTS.md`](data-sources/farm-data-rebuild/AGENTS.md)
 - "Generate field boundaries or map views" -> [`field-management/field-boundaries/GUIDE.md`](field-management/field-boundaries/GUIDE.md)
 - "Check weather and maturity planning" -> [`weather/INDEX.md`](weather/INDEX.md) and [`strategy/INDEX.md`](strategy/INDEX.md)
-- "Prepare a farm intelligence report" -> [`data-sources/farm-intelligence-reporting/PLAYBOOK.md`](data-sources/farm-intelligence-reporting/PLAYBOOK.md)
+- "Prepare a farm intelligence report" -> [`data-sources/farm-intelligence-reporting/AGENTS.md`](data-sources/farm-intelligence-reporting/AGENTS.md)
 
 ## Why It Matters In This Repo
 
@@ -290,8 +290,8 @@ This skill is the main farm-specific intelligence layer. The rest of the reposit
 
 - Umbrella router: [`SKILL.md`](SKILL.md)
 - Top-level navigation: [`INDEX.md`](INDEX.md)
-- Farm data rebuild: [`data-sources/farm-data-rebuild/PLAYBOOK.md`](data-sources/farm-data-rebuild/PLAYBOOK.md)
-- Farm reporting: [`data-sources/farm-intelligence-reporting/PLAYBOOK.md`](data-sources/farm-intelligence-reporting/PLAYBOOK.md)
+- Farm data rebuild: [`data-sources/farm-data-rebuild/AGENTS.md`](data-sources/farm-data-rebuild/AGENTS.md)
+- Farm reporting: [`data-sources/farm-intelligence-reporting/AGENTS.md`](data-sources/farm-intelligence-reporting/AGENTS.md)
 - Field boundaries: [`field-management/field-boundaries/GUIDE.md`](field-management/field-boundaries/GUIDE.md)
 - SSURGO workflows: [`soil/ssurgo-soil/GUIDE.md`](soil/ssurgo-soil/GUIDE.md)
 - Sentinel-2 workflows: [`imagery/sentinel2-imagery/GUIDE.md`](imagery/sentinel2-imagery/GUIDE.md)
@@ -309,5 +309,5 @@ This skill is the main farm-specific intelligence layer. The rest of the reposit
 
 1. Start with [`SKILL.md`](SKILL.md).
 2. Open the matching area in [`INDEX.md`](INDEX.md).
-3. Follow the linked `GUIDE.md` or `PLAYBOOK.md`.
+3. Follow the linked `GUIDE.md` or `AGENTS.md`.
 4. Keep outputs tied back to fields, source data, and reproducible methods.
