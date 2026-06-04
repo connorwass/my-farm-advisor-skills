@@ -6,15 +6,15 @@ author: Boreal Bytes
 tags: [usda, nass, cdl, cropland, raster, geospatial, download]
 ---
 
-# Skill: cdl-cropland
+# Workflow: cdl-cropland
 
 ## Description
 
-Download and analyze USDA NASS Cropland Data Layer (CDL) annual crop type rasters. The CDL is a 30-meter resolution raster covering the contiguous US, classifying every pixel into one of 130+ crop and land cover types. This skill clips CDL rasters to field boundaries and extracts per-field crop classifications.
+Download and analyze USDA NASS Cropland Data Layer (CDL) annual crop type rasters. The CDL is a 30-meter resolution raster covering the contiguous US, classifying every pixel into one of 130+ crop and land cover types. This workflow clips CDL rasters to field boundaries and extracts per-field crop classifications.
 
-The skill now also supports reporting-oriented outputs that keep the full crop composition for each field-year so downstream dashboards and posters can render 100% stacked crop history charts rather than relying only on dominant crop summaries.
+The workflow now also supports reporting-oriented outputs that keep the full crop composition for each field-year so downstream dashboards and posters can render 100% stacked crop history charts rather than relying only on dominant crop summaries.
 
-## When to Use This Skill
+## When to Use This Workflow
 
 - **Crop identification**: Determine what crop was planted in a field for a given year
 - **Rotation analysis**: Build multi-year crop sequences (e.g., corn-soybean rotation)
@@ -130,10 +130,10 @@ EOF
 
 ## Installation (Isolated Environment)
 
-This skill runs in an isolated environment to avoid dependency conflicts:
+This workflow runs in an isolated environment to avoid dependency conflicts:
 
 ```bash
-# Create dedicated environment for this skill
+# Create dedicated environment for this workflow
 cd .skills/cdl-cropland
 uv venv .venv
 source .venv/bin/activate
@@ -290,7 +290,7 @@ CSV columns: `field_id`, `year`, `crop_code`, `crop_name`, `dominant_pct`, `tota
 
 ## Environment Variables
 
-No special environment variables required. The skill uses public USDA data.
+No special environment variables required. The workflow uses public USDA data.
 
 ## Resources
 

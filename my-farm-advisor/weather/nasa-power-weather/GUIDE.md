@@ -6,13 +6,13 @@ author: Boreal Bytes
 tags: [nasa, power, weather, climate, agriculture, api, gdd]
 ---
 
-# Skill: nasa-power-weather
+# Workflow: nasa-power-weather
 
 ## Description
 
 Download and analyze daily weather data from the NASA POWER (Prediction of Worldwide Energy Resources) API for agricultural field locations. The API is free, requires no authentication, and covers the entire globe at 0.5° resolution from 1981 to near-present.
 
-This skill teaches agents to:
+This workflow teaches agents to:
 
 - Query the NASA POWER REST API directly with `requests`
 - Parse the JSON response into `pandas` DataFrames
@@ -21,7 +21,7 @@ This skill teaches agents to:
 - Work with coordinates from the `field-boundaries` skill
 - Prepare reporting-ready day-of-year, cumulative GDD, and precipitation-distribution summaries for posters and self-contained HTML reports
 
-## When to Use This Skill
+## When to Use This Workflow
 
 - **Historical weather retrieval**: Get daily temperature, precipitation, solar radiation for specific coordinates
 - **Crop modeling inputs**: Obtain GDD, accumulated precipitation, solar radiation totals

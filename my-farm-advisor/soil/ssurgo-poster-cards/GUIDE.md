@@ -8,7 +8,7 @@ tags: [agriculture, soil, ssurgo, visualization, poster]
 
 # SSURGO Poster Cards
 
-## Use this skill when
+## Use this workflow when
 
 - The user wants soil profile figures from SSURGO.
 - The user wants poster-ready SVG, PDF, or high-resolution PNG exports.

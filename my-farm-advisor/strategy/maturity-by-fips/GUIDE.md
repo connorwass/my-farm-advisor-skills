@@ -6,7 +6,7 @@ _Repo-native skill scaffold for annual county/FIPS maturity products._
 
 ## 📋 Purpose
 
-This skill will own annual maturity-by-FIPS logic for the repository, including heuristic corn RM and soybean MG outputs that reuse canonical shared data assets.
+This workflow owns annual maturity-by-FIPS logic for the repository, including heuristic corn RM and soybean MG outputs that reuse canonical shared data assets.
 
 ## 📦 Scope
 

@@ -6,13 +6,13 @@ author: Boreal Bytes
 tags: [usda, nrcs, ssurgo, soil, geospatial, download]
 ---
 
-# Skill: ssurgo-soil
+# Workflow: ssurgo-soil
 
 ## Description
 
-Download, map, and analyze USDA NRCS SSURGO (Soil Survey Geographic Database) soil properties for agricultural fields. This skill queries the free NRCS Soil Data Access (SDA) REST API to retrieve soil organic matter, pH, texture, drainage class, and other properties, then supports field-level choropleths, SSURGO overlays, and headlands-ring workflow figures. No API key required.
+Download, map, and analyze USDA NRCS SSURGO (Soil Survey Geographic Database) soil properties for agricultural fields. This workflow queries the free NRCS Soil Data Access (SDA) REST API to retrieve soil organic matter, pH, texture, drainage class, and other properties, then supports field-level choropleths, SSURGO overlays, and headlands-ring workflow figures. No API key required.
 
-## When to Use This Skill
+## When to Use This Workflow
 
 - **Getting soil data**: Download soil properties for field boundaries or points
 - **Soil analysis**: Organic matter, pH, texture, drainage, bulk density, CEC
@@ -77,10 +77,10 @@ EOF
 
 ## Installation (Isolated Environment)
 
-This skill runs in an isolated environment to avoid dependency conflicts:
+This workflow runs in an isolated environment to avoid dependency conflicts:
 
 ```bash
-# Create dedicated environment for this skill
+# Create dedicated environment for this workflow
 cd .skills/ssurgo-soil
 uv venv .venv
 source .venv/bin/activate

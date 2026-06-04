@@ -1,6 +1,6 @@
 # ssurgo-poster-cards
 
-This skill builds poster-ready soil profile cards from SSURGO horizon data stored in SQLite.
+This workflow builds poster-ready soil profile cards from SSURGO horizon data stored in SQLite.
 
 ## Generates
 
