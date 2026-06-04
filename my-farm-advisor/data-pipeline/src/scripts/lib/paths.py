@@ -2,8 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-DATA_ROOT = Path(__file__).resolve().parents[2]
-SCRIPTS_ROOT = DATA_ROOT / "scripts"
+try:
+    from .runtime_paths import resolve_runtime_paths
+except ImportError:  # Support scripts that import this module as top-level "paths".
+    from runtime_paths import resolve_runtime_paths
+
+
+_RUNTIME_PATHS = resolve_runtime_paths()
+
+DATA_ROOT = _RUNTIME_PATHS.runtime_base
+SCRIPTS_ROOT = _RUNTIME_PATHS.runtime_scripts
 GROWERS_ROOT = DATA_ROOT / "growers"
 SHARED_ROOT = DATA_ROOT / "shared"
 

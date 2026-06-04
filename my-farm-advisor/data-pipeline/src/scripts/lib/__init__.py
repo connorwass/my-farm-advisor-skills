@@ -1,4 +1,4 @@
-# data/my-farm-advisor/scripts/lib - Canonical helper modules for data tree operations
+# Runtime data-pipeline scripts/lib - Canonical helper modules for data tree operations
 """
 Helper package for canonical path construction, naming utilities, and manifest management.
 
