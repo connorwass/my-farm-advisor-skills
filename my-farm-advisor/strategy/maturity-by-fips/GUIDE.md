@@ -16,6 +16,6 @@ This workflow owns annual maturity-by-FIPS logic for the repository, including h
 
 ## 🔗 Integration
 
-- Code lives under `.opencode/skills/maturity-by-fips/src/`
-- Shared outputs live under `data/my-farm-advisor/shared/corn_maturity/` and `data/my-farm-advisor/shared/soybean_maturity/`
-- Annual entrypoints live under `data/my-farm-advisor/scripts/`
+- Code lives under `my-farm-advisor/strategy/maturity-by-fips/src/`
+- Shared outputs live under `${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/corn_maturity/` and `${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/soybean_maturity/`
+- Annual entrypoints live under `${DATA_PIPELINE_DATA_ROOT}/data-pipeline/src/scripts/`

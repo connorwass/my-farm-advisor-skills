@@ -45,7 +45,7 @@ Sample data is included in the `examples/` directory:
 
 - `examples/sample_weather_2fields_2020_2024.csv` — 3,654 rows of daily weather for 2 Minnesota corn fields (2020-2024)
 
-The two fields match the `field-boundaries` skill sample data (`sample_2_fields.geojson`):
+The bundled CSV keeps two legacy Minnesota field IDs for stable tests:
 
 | Field ID        | Latitude | Longitude | Location           |
 | --------------- | -------- | --------- | ------------------ |
@@ -295,9 +295,9 @@ def download_for_fields(geojson_path: str, start: str, end: str,
     return result
 
 
-# Usage with field-boundaries sample data:
+# Usage with current field-boundaries example data:
 # weather = download_for_fields(
-#     '../field-boundaries/examples/sample_2_fields.geojson',
+#     'my-farm-advisor/field-management/field-boundaries/examples/real_10_fields_iowa.geojson',
 #     '2020-01-01', '2024-12-31',
 #     output_csv='weather_2fields.csv'
 # )
