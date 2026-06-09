@@ -49,6 +49,14 @@ Expected outputs are:
 
 ## How to run the downloader
 
+For the default first-run shared-data setup, use the data-pipeline installer. This builds geoadmin L0/L1/L2 before the shared weather and maturity steps:
+
+```bash
+export DATA_PIPELINE_DATA_ROOT=/absolute/path/to/my-farm-advisor-runtime
+cd my-farm-advisor/data-pipeline
+./scripts/install.sh --prepare-shared-data
+```
+
 Set an explicit absolute runtime root, install the runtime copy, then run from `${DATA_PIPELINE_DATA_ROOT}/data-pipeline/src`:
 
 ```bash

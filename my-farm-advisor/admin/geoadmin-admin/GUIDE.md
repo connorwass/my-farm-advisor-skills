@@ -19,3 +19,11 @@ This workflow owns shared geoadmin data handling for the repository, including c
 - Code lives under `my-farm-advisor/admin/geoadmin-admin/src/`
 - Shared outputs live under `${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/geoadmin/`
 - Annual maturity scripts consume this skill through repo-native path helpers and bootstrap code
+
+The default shared-data initializer builds L0/L1/L2 geoadmin payloads before county weather and maturity outputs:
+
+```bash
+export DATA_PIPELINE_DATA_ROOT=/absolute/path/to/my-farm-advisor-runtime
+cd my-farm-advisor/data-pipeline
+./scripts/install.sh --prepare-shared-data
+```

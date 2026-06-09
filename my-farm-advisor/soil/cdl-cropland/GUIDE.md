@@ -54,6 +54,26 @@ print(cdl[['field_id', 'year', 'crop_code', 'crop_name', 'dominant_pct']])
 
 ## Quick Start
 
+For data-pipeline first runs, initialize the shared last-five-year CONUS CDL rasters through the data-pipeline installer:
+
+```bash
+export DATA_PIPELINE_DATA_ROOT=/absolute/path/to/my-farm-advisor-runtime
+cd my-farm-advisor/data-pipeline
+./scripts/install.sh --prepare-shared-data
+```
+
+Runtime equivalent after install:
+
+```bash
+cd "${DATA_PIPELINE_DATA_ROOT}/data-pipeline/src"
+"${DATA_PIPELINE_DATA_ROOT}/data-pipeline/.venv/bin/python" \
+  scripts/ingest/download_cdl.py \
+  --raster-only \
+  --cdl-scope conus \
+  --cdl-latest-year 2025 \
+  --cdl-window-years 5
+```
+
 ```bash
 # Download CDL GeoTIFF and extract crop types for field boundaries
 uv run --with rasterio --with geopandas --with rasterstats --with requests python << 'EOF'
@@ -76,7 +96,7 @@ state_fips = '29'  # Example only; set this to the farm state FIPS
 cdl_url = (
     f'https://nassgeodata.gmu.edu/nass_data_cache/byfips/CDL_{year}_{state_fips}.tif'
 )
-cdl_path = Path(f'${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/raw/CDL_{year}_{state_fips}.tif')
+cdl_path = Path(f'${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/rasters/CDL_{year}_{state_fips}.tif')
 cdl_path.parent.mkdir(parents=True, exist_ok=True)
 
 if not cdl_path.exists():
@@ -159,7 +179,7 @@ uv pip install rasterio geopandas rasterstats requests pandas matplotlib
 | Method        | URL Pattern                                                                      | Notes                         |
 | ------------- | -------------------------------------------------------------------------------- | ----------------------------- |
 | State GeoTIFF | `https://nassgeodata.gmu.edu/nass_data_cache/byfips/CDL_{year}_{state_fips}.tif` | Fastest for single-state work |
-| CONUS GeoTIFF | `https://nassgeodata.gmu.edu/nass_data_cache/byfips/CDL_{year}_CONUS.tif`        | Large (~2 GB), full US        |
+| CONUS GeoTIFF | `https://nassgeodata.gmu.edu/nass_data_cache/byfips/CDL_{year}_CONUS.tif`        | All-state shared initialization |
 | CropScape API | `https://nassgeodata.gmu.edu/CropScapeService/wps_cdldata.asmx`                  | Bounding-box queries          |
 
 ## Major Crop Classes
@@ -191,7 +211,7 @@ from pathlib import Path
 fields = gpd.read_file('my-farm-advisor/field-management/field-boundaries/examples/real_10_fields_iowa.geojson')
 
 year = 2023
-cdl_path = Path(f'${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/raw/CDL_{year}_27.tif')
+cdl_path = Path(f'${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/rasters/CDL_{year}_27.tif')
 
 with rasterio.open(cdl_path) as src:
     fields_proj = fields.to_crs(src.crs)
@@ -216,7 +236,7 @@ years = [2020, 2021, 2022, 2023, 2024]
 all_results = []
 
 for year in years:
-    cdl_path = f'${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/raw/CDL_{year}_27.tif'
+    cdl_path = f'${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/rasters/CDL_{year}_27.tif'
     # ... extract crops per field (see Quick Start) ...
     # all_results.extend(year_results)
 
@@ -236,7 +256,7 @@ import geopandas as gpd
 from rasterstats import zonal_stats
 
 fields = gpd.read_file('my-farm-advisor/field-management/field-boundaries/examples/real_10_fields_iowa.geojson')
-cdl_path = '${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/raw/CDL_2023_27.tif'
+cdl_path = '${DATA_PIPELINE_DATA_ROOT}/data-pipeline/shared/cdl/rasters/CDL_2023_27.tif'
 
 # Get pixel counts per crop code within each field
 stats = zonal_stats(
