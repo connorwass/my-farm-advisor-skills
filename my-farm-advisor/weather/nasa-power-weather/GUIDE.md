@@ -183,14 +183,14 @@ The API is free and requires no key. NASA asks that users:
 - Cache results locally — the data does not change retroactively
 - Use the `AG` community for agricultural parameters
 
-For farm pipelines and shared L2/county rebuilds, prefer the data-pipeline Zarr backend instead of the point API. The runtime initializer can build the supported 2021-2025 lower48 maturity baseline in one pass:
+For farm pipelines and shared L2/county rebuilds, prefer the data-pipeline Zarr backend instead of the point API. The runtime initializer can build the supported 2021-2025 lower48 shared weather and maturity baseline in one pass:
 
 ```bash
 cd my-farm-advisor/data-pipeline
-./scripts/install.sh --prepare-shared-maturity
+./scripts/install.sh --prepare-shared-data
 ```
 
-That calls the multi-year maturity runner:
+That calls the multi-year maturity runner, plus the shared CDL raster initializer:
 
 ```bash
 python scripts/run_maturity_years_by_fips.py \
@@ -199,7 +199,10 @@ python scripts/run_maturity_years_by_fips.py \
   --coverage lower48 \
   --weather-backend zarr \
   --weather-time-standard lst
+python scripts/ingest/download_cdl.py --raster-only --cdl-scope conus --cdl-window-years 5
 ```
+
+Use `./scripts/install.sh --prepare-shared-maturity` only when CDL rasters are not needed.
 
 For a single annual refresh, run:
 
