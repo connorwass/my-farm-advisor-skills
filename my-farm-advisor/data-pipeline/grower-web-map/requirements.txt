@@ -1,0 +1,2 @@
+# Grower Web Map — no additional Python dependencies beyond data-pipeline venv
+# Leaflet.js and OSM tiles load from CDN at runtime in the browser.
