@@ -43,6 +43,7 @@ Open the subtree index that matches the request:
 - Use **Imagery** for Landsat or Sentinel-2 scene acquisition and vegetation products.
 - Use **Soil** for SSURGO and CDL-derived soil and crop-layer analysis.
 - Use **EDA** for exploration, comparisons, correlations, visualization, and time series.
+- Use **EDA (CDL/Weather/Boundary)** for cross-grower comparisons of field boundaries, weather patterns, and CDL crop composition.
 - Use **Data Sources** for canonical data rebuilds and farm-level intelligence reporting.
 - Use **Strategy** for maturity planning and crop-strategy decisions.
 - Use **Weather** for NASA POWER weather acquisition and downstream farm weather analysis.
