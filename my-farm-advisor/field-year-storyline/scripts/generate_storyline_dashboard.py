@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from scipy.interpolate import PchipInterpolator
+from numpy.polynomial import Polynomial
 
 BASE_TEMP = 10.0
 GROWING_SEASON = (91, 304)
@@ -46,7 +46,7 @@ DEFAULT_WEATHER_PATH = REPO_ROOT / "my-farm-advisor" / "weather" / "nasa-power-w
 
 DEFAULT_CDL_PATH = REPO_ROOT / "my-farm-advisor" / "soil" / "cdl-cropland" / "examples" / "sample_cdl_2_fields.csv"
 DEFAULT_NDVI_PATH = REPO_ROOT / "my-farm-advisor" / "imagery" / "sentinel2-imagery" / "examples" / "sample_field_stats.csv"
-OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output"
+OUTPUT_DIR = Path("/home/coder/my-farm-advisor-runtime/field-year-storyline")
 
 DEFAULT_FIELD = "OSM_1428284928"
 DEFAULT_WEATHER_FIELD = "271623002471299"
@@ -92,8 +92,13 @@ def detect_events(weather: pd.DataFrame) -> list[dict]:
         events.append({"doy": r["doy"], "type": "heavy_rain", "value": r["PRECTOTCORR"], "desc": f"{r['PRECTOTCORR']:.0f}mm rain"})
 
     hot = weather[weather["T2M_MAX"] > 35]
-    for _, r in hot.iterrows():
-        events.append({"doy": r["doy"], "type": "heat", "value": r["T2M_MAX"], "desc": f"{r['T2M_MAX']:.0f}°C max"})
+    if not hot.empty:
+        hot = hot.copy()
+        hot["gap"] = hot["doy"].diff()
+        hot["wave"] = (hot["gap"] > 5).cumsum()
+        for _, wave in hot.groupby("wave"):
+            peak = wave.loc[wave["T2M_MAX"].idxmax()]
+            events.append({"doy": int(peak["doy"]), "type": "heat", "value": float(peak["T2M_MAX"]), "desc": f"{peak['T2M_MAX']:.0f}°C max"})
 
     frost = weather[weather["T2M_MIN"] <= 0]
     spring = frost[frost["doy"] <= 213]
@@ -110,33 +115,24 @@ def detect_events(weather: pd.DataFrame) -> list[dict]:
 
 def generate_ndvi_curve(ndvi_records: pd.DataFrame, doy_range: np.ndarray) -> np.ndarray:
     doys, ndvis = zip(*CORN_NDVI_PHENOLOGY)
-    phenology_doys = list(doys)
-    phenology_ndvis = list(ndvis)
+    fit_doys = list(doys)
+    fit_ndvis = list(ndvis)
 
     if not ndvi_records.empty:
         for _, r in ndvi_records.iterrows():
             d = int(r["doy"])
             v = float(r["mean_ndvi"])
-            if d not in phenology_doys:
-                idx = np.searchsorted(phenology_doys, d)
-                phenology_doys.insert(idx, d)
-                phenology_ndvis.insert(idx, v)
+            if d not in fit_doys:
+                idx = np.searchsorted(fit_doys, d)
+                fit_doys.insert(idx, d)
+                fit_ndvis.insert(idx, v)
 
-    interp = PchipInterpolator(phenology_doys, phenology_ndvis)
-    vals = interp(doy_range)
+    p = Polynomial.fit(fit_doys, fit_ndvis, deg=4)
+    vals = p(doy_range)
     return np.clip(vals, 0.0, 1.0)
 
 
-def generate_captions(events: list[dict], ndvi_peak_doy: float, ndvi_peak_val: float, total_precip: float, total_gdd: float, crop: str) -> list[str]:
-    captions = [
-        f"Season overview: {crop} field, DOY {GS_START}–{GS_END}.",
-        f"Total precipitation: {total_precip:.0f}mm. Total GDD: {total_gdd:.0f} (base 10°C).",
-    ]
-    if ndvi_peak_val > 0:
-        captions.append(f"Peak NDVI of {ndvi_peak_val:.2f} reached around DOY {ndvi_peak_doy:.0f}.")
-    for ev in events:
-        captions.append(f"DOY {ev['doy']}: {ev['desc']}.")
-    return captions
+
 
 
 def _doy_to_date(doy: int | np.ndarray, year: int = 2024) -> np.datetime64 | np.ndarray:
@@ -178,6 +174,10 @@ def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.nd
     ax1.set_title("NDVI (Sentinel-2 derived, phenology model)", fontsize=11, fontweight="bold")
     ax1.legend(fontsize=8, loc="upper left")
     ax1.grid(True, alpha=0.2)
+    ax1.text(0.97, 0.95, f"Peak: {ndvi_peak_val:.2f}\nObs: {len(ndvi_records)} dates",
+             transform=ax1.transAxes, fontsize=8, color="#374151",
+             verticalalignment="top", horizontalalignment="right",
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
 
     ax2 = axes[1]
     ax2.bar(dates, precip, color="#0891b2", width=1.5, alpha=0.6, label="Daily precip")
@@ -195,6 +195,12 @@ def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.nd
     ax2.set_title("Precipitation", fontsize=11, fontweight="bold")
     ax2.legend(fontsize=8, loc="upper left")
     ax2.grid(True, alpha=0.2)
+    max_precip = precip.max()
+    max_precip_doy = weather.loc[precip.argmax(), "doy"]
+    ax2.text(0.97, 0.95, f"Total: {precip.sum():.0f} mm\nMax: {max_precip:.0f} mm (DOY {max_precip_doy})",
+             transform=ax2.transAxes, fontsize=8, color="#374151",
+             verticalalignment="top", horizontalalignment="right",
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
 
     ax3 = axes[2]
     ax3.fill_between(dates, tmin, tmax, color="#f97316", alpha=0.25, label="Daily range")
@@ -219,6 +225,18 @@ def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.nd
     ax3.set_title("Temperature / Extremes", fontsize=11, fontweight="bold")
     ax3.legend(fontsize=8, loc="upper left")
     ax3.grid(True, alpha=0.2)
+    tmax_val = tmax.max()
+    tmax_doy = weather.loc[tmax.argmax(), "doy"]
+    frost_events = [e for e in events if e["type"] == "frost"]
+    frost_parts = []
+    for e in frost_events:
+        label = "Spring" if "spring" in e["desc"].lower() else "Fall"
+        frost_parts.append(f"{label}: DOY {e['doy']}")
+    frost_text = " | ".join(frost_parts) if frost_parts else "none"
+    ax3.text(0.97, 0.95, f"Max: {tmax_val:.0f}°C (DOY {tmax_doy})\nFrost: {frost_text}",
+             transform=ax3.transAxes, fontsize=8, color="#374151",
+             verticalalignment="top", horizontalalignment="right",
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
 
     ax4 = axes[3]
     ax4.plot(dates, gdd_cum, color="#7c3aed", linewidth=2, label=f"GDD (base {BASE_TEMP}°C)")
@@ -237,6 +255,11 @@ def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.nd
     ax4.set_title(f"Cumulative Growing Degree Days (base {BASE_TEMP}°C)", fontsize=11, fontweight="bold")
     ax4.legend(fontsize=8, loc="upper left")
     ax4.grid(True, alpha=0.2)
+    total_gdd_val = float(gdd_cum.values[-1]) if len(gdd_cum) > 0 else 0
+    ax4.text(0.97, 0.95, f"Total: {total_gdd_val:.0f} GDD\nBase: {BASE_TEMP}°C",
+             transform=ax4.transAxes, fontsize=8, color="#374151",
+             verticalalignment="top", horizontalalignment="right",
+             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
 
     for ax in axes:
         ax.set_xlim(gs_start_date, gs_end_date)
@@ -244,15 +267,15 @@ def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.nd
     axes[-1].xaxis.set_major_formatter(mdates.DateFormatter("%b"))
     plt.setp(axes[-1].xaxis.get_majorticklabels(), rotation=0, ha="center")
 
-    fig.text(0.5, 0.01, "Growing Season (Apr 1 – Oct 31)", ha="center", fontsize=10, fontweight="bold")
+    total_precip_val = precip.sum()
+    total_gdd_val = gdd.sum()
+    peak_doy = float(ndvi_doy[ndvi_peak_idx])
+    overview = f"{crop} | DOY {GS_START}–{GS_END} | Precip: {total_precip_val:.0f}mm | GDD: {total_gdd_val:.0f} | Peak NDVI: {ndvi_peak_val:.2f} (DOY {peak_doy:.0f})"
+    fig.text(0.5, 0.93, overview, ha="center", fontsize=10, color="#1f2937",
+             fontweight="bold", wrap=True,
+             bbox=dict(boxstyle="round,pad=0.4", facecolor="#f0fdf4", edgecolor="#16a34a", alpha=0.9))
 
-    captions = generate_captions(events, ndvi_peak_doy=float(ndvi_doy[ndvi_peak_idx]),
-                                 ndvi_peak_val=ndvi_peak_val,
-                                 total_precip=precip.sum(), total_gdd=gdd.sum(), crop=crop)
-    caption_text = " | ".join(captions)
-    fig.text(0.5, -0.02, caption_text, ha="center", fontsize=7, color="#374151", wrap=True)
-
-    plt.tight_layout(rect=[0, 0.04, 1, 0.95])
+    plt.tight_layout(rect=[0, 0.02, 1, 0.92])
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close(fig)
@@ -312,14 +335,7 @@ def main():
     output_path = output_dir / f"field_year_storyline_{args.field}_{args.year}.png"
     plot_dashboard(weather, doy_range, ndvi_vals, ndvi_records, events, crop, args.field, args.year, args.weather_field, output_path)
 
-    print("\nSeason Captions:")
-    total_precip = weather["PRECTOTCORR"].sum()
-    gdd = compute_gdd(weather["T2M_MAX"], weather["T2M_MIN"])
-    total_gdd = gdd.sum()
-    ndvi_peak_idx = np.argmax(ndvi_vals)
-    captions = generate_captions(events, doy_range[ndvi_peak_idx], ndvi_vals[ndvi_peak_idx], total_precip, total_gdd, crop)
-    for c in captions:
-        print(f"  • {c}")
+    print(f"\nSeason: {crop} | Precip: {weather['PRECTOTCORR'].sum():.0f}mm | GDD: {compute_gdd(weather['T2M_MAX'], weather['T2M_MIN']).sum():.0f} | Peak NDVI: {ndvi_vals.max():.3f}")
 
 
 if __name__ == "__main__":

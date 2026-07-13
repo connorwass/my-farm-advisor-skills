@@ -1,7 +1,9 @@
 """
-Extract per-date mean NDVI from Landsat scene rasters for a production field,
-using its boundary GeoJSON. Outputs a CSV compatible with
-generate_storyline_dashboard.py --ndvi-stats.
+Extract per-date mean NDVI from Sentinel-2 or Landsat scene rasters for a
+production field, using its boundary GeoJSON. Outputs a CSV compatible with
+generate_storyline_dashboard.py --ndvi-stats.  Defaults to Sentinel-2 (the
+recommended NDVI source for this assignment); use --source Landsat to use
+Landsat instead.
 
 Usage:
     python extract_production_ndvi.py \\
@@ -47,22 +49,30 @@ def main():
     parser.add_argument("--field-dir", required=True, help="Path to field directory (e.g., .../fields/osm-1360394834)")
     parser.add_argument("--year", type=int, required=True, help="Year to process")
     parser.add_argument("--output", required=True, help="Output CSV path")
-    parser.add_argument("--source", default="Landsat", help="Satellite source label")
+    parser.add_argument("--source", default="Sentinel-2", help="Satellite source (sets folder prefix: sentinel_ or landsat_)")
     args = parser.parse_args()
+
+    source_lower = args.source.lower()
+    if "sentinel" in source_lower:
+        satellite = "sentinel"
+        prefix = "sentinel_"
+    else:
+        satellite = "landsat"
+        prefix = "landsat_"
 
     field_dir = Path(args.field_dir)
     boundary_path = field_dir / "boundary" / "field_boundary.geojson"
-    landsat_dir = field_dir / "satellite" / "landsat" / str(args.year)
+    sat_dir = field_dir / "satellite" / satellite / str(args.year)
 
     if not boundary_path.exists():
         print(f"Error: boundary not found at {boundary_path}", file=sys.stderr)
         sys.exit(1)
-    if not landsat_dir.exists():
-        print(f"Error: landsat dir not found at {landsat_dir}", file=sys.stderr)
+    if not sat_dir.exists():
+        print(f"Error: {satellite} dir not found at {sat_dir}", file=sys.stderr)
         sys.exit(1)
 
     rows = []
-    scenes = sorted(landsat_dir.iterdir())
+    scenes = sorted(sat_dir.iterdir())
     for scene_dir in scenes:
         if not scene_dir.is_dir():
             continue
@@ -70,7 +80,7 @@ def main():
         if not ndvi_path.exists():
             continue
 
-        date_str = scene_dir.name.split("_")[-1]
+        date_str = scene_dir.name.replace(prefix, "")
         mean_ndvi = extract_field_mean_ndvi(ndvi_path, boundary_path)
         if mean_ndvi is not None:
             rows.append({

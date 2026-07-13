@@ -3,11 +3,11 @@ name: field-year-storyline
 description: >
   Field-year storyline dashboard generator. Selects a field and year from CDL
   tables, reads daily weather and Sentinel NDVI records, aligns them on a shared
-  growing-season timeline, and produces a 4-panel mini-dashboard with NDVI,
-  precipitation, temperature/extremes, and cumulative GDD.
-version: 1.0.0
+  growing-season timeline, and produces a 4-panel mini-dashboard with NDVI
+  (polynomial fit), precipitation, temperature/extremes, and cumulative GDD.
+version: 1.1.0
 author: Connor Wass
-tags: [storyline, dashboard, ndvi, weather, gdd, cdl, sentinel]
+tags: [storyline, dashboard, ndvi, weather, gdd, cdl, sentinel, polynomial]
 ---
 
 # field-year-storyline
@@ -28,6 +28,18 @@ Read `GUIDE.md` for the workflow walkthrough, then run:
 python scripts/generate_storyline_dashboard.py
 ```
 
+## NDVI curve fitting
+
+The NDVI panel uses a degree-4 polynomial regression (`numpy.polynomial.Polynomial.fit`)
+fitted to a merged set of:
+- A corn phenology reference curve (`CORN_NDVI_PHENOLOGY` — 14 anchor points from
+  DOY 91–304 covering green-up, peak, and senescence)
+- Any observed Sentinel-2 NDVI records for the field
+
+This produces a smooth best-fit curve rather than interpolating through every
+point, giving a more realistic vegetation trajectory when observations are sparse
+(~1–5 dates per year due to cloud cover and revisit frequency).
+
 ## Required inputs
 
 **Production** (runtime data-pipeline):
@@ -35,11 +47,6 @@ python scripts/generate_storyline_dashboard.py
 - `growers/{grower}/.../derived/tables/{farm}_cdl_*_full_composition.csv`
 - Landsat NDVI rasters from `.../satellite/landsat/<year>/` (extracted via `scripts/extract_production_ndvi.py`)
 
-**Sample fallback** (committed):
-- `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv`
-- `soil/cdl-cropland/examples/sample_cdl_2_fields.csv`
-- `imagery/sentinel2-imagery/examples/sample_field_stats.csv`
-
 ## Output
 
-`output/field_year_storyline_{field_id}_{year}.png`
+`/home/coder/my-farm-advisor-runtime/field-year-storyline/field_year_storyline_{field_id}_{year}.png`
