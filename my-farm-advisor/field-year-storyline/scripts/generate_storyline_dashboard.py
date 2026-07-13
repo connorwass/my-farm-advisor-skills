@@ -39,9 +39,13 @@ EVENT_STYLES = {
 }
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SAMPLE_WEATHER = REPO_ROOT / "my-farm-advisor" / "weather" / "nasa-power-weather" / "examples" / "sample_weather_2fields_2020_2024.csv"
-SAMPLE_CDL = REPO_ROOT / "my-farm-advisor" / "soil" / "cdl-cropland" / "examples" / "sample_cdl_2_fields.csv"
-SAMPLE_NDVI_STATS = REPO_ROOT / "my-farm-advisor" / "imagery" / "sentinel2-imagery" / "examples" / "sample_field_stats.csv"
+
+# Canonical input: daily_weather.csv (pipeline output per-field weather)
+# Sample shipped with the repo (same schema as daily_weather.csv):
+DEFAULT_WEATHER_PATH = REPO_ROOT / "my-farm-advisor" / "weather" / "nasa-power-weather" / "examples" / "sample_weather_2fields_2020_2024.csv"
+
+DEFAULT_CDL_PATH = REPO_ROOT / "my-farm-advisor" / "soil" / "cdl-cropland" / "examples" / "sample_cdl_2_fields.csv"
+DEFAULT_NDVI_PATH = REPO_ROOT / "my-farm-advisor" / "imagery" / "sentinel2-imagery" / "examples" / "sample_field_stats.csv"
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "output"
 
 DEFAULT_FIELD = "OSM_1428284928"
@@ -255,9 +259,9 @@ def main():
     parser.add_argument("--field", default=DEFAULT_FIELD, help=f"CDL field ID (default: {DEFAULT_FIELD})")
     parser.add_argument("--weather-field", default=DEFAULT_WEATHER_FIELD, help=f"Weather field ID (default: {DEFAULT_WEATHER_FIELD})")
     parser.add_argument("--year", type=int, default=DEFAULT_YEAR, help=f"Year (default: {DEFAULT_YEAR})")
-    parser.add_argument("--weather", default=str(SAMPLE_WEATHER), help="Weather CSV path")
-    parser.add_argument("--cdl", default=str(SAMPLE_CDL), help="CDL CSV path")
-    parser.add_argument("--ndvi-stats", default=str(SAMPLE_NDVI_STATS), help="NDVI stats CSV path")
+    parser.add_argument("--weather", default=str(DEFAULT_WEATHER_PATH), help="daily_weather.csv path (or any CSV with field_id,date,T2M_MAX,T2M_MIN,PRECTOTCORR)")
+    parser.add_argument("--cdl", default=str(DEFAULT_CDL_PATH), help="CDL CSV path")
+    parser.add_argument("--ndvi-stats", default=str(DEFAULT_NDVI_PATH), help="NDVI stats CSV path")
     parser.add_argument("--output-dir", default=str(OUTPUT_DIR), help="Output directory")
     args = parser.parse_args()
 

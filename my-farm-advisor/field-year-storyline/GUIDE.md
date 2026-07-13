@@ -32,7 +32,7 @@ captions.
 
 | Input | Path (relative to repo root) |
 |---|---|
-| Daily weather | `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv` |
+| Daily weather (`daily_weather.csv` schema) | `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv` |
 | CDL crop table | `soil/cdl-cropland/examples/sample_cdl_2_fields.csv` |
 | Sentinel NDVI stats | `imagery/sentinel2-imagery/examples/sample_field_stats.csv` |
 
@@ -64,5 +64,8 @@ Output: `SKILL_DIR/output/field_year_storyline_OSM_1428284928_2024.png`
   is modeled from corn phenology control points, calibrated to the real anchor.
 - CDL and weather sample files use different field ID conventions. In a
   production pipeline these would share a unified field_id.
+- The sample weather file is named `sample_weather_2fields_2020_2024.csv` but
+  uses the same schema as the pipeline's `daily_weather.csv`. Point `--weather`
+  to any `daily_weather.csv` for production use.
 - Weather data is from NASA POWER at 0.5° grid resolution, which smooths local
   variability.

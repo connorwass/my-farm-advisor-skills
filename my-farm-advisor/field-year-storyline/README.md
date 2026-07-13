@@ -20,7 +20,7 @@ All inputs from `data-pipeline` and its children:
 
 | File | Location |
 |---|---|
-| Daily weather | `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv` |
+| Daily weather (`daily_weather.csv`) | `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv` (same schema) |
 | CDL crop table | `soil/cdl-cropland/examples/sample_cdl_2_fields.csv` |
 | Sentinel NDVI | `imagery/sentinel2-imagery/examples/sample_field_stats.csv` |
 
@@ -69,6 +69,9 @@ done
   anchor. Multi-date NDVI would improve accuracy in production.
 - **Field ID mismatch:** CDL uses `OSM_*` IDs, weather uses numeric IDs. No
   cross-mapping exists in the sample data. Selection is manual.
+- **Weather filename:** The sample is named `sample_weather_2fields_2020_2024.csv`
+  but uses the same schema as the pipeline's `daily_weather.csv`. Use `--weather`
+  to point to any `daily_weather.csv` in production.
 - **Geography:** Weather field (47.06°N, 95.95°W, NW Minnesota) and CDL/NDVI
   origin (Iowa corn belt) differ. In a full pipeline run, all data shares a
   unified field_id.

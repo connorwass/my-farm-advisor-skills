@@ -30,7 +30,7 @@ python scripts/generate_storyline_dashboard.py
 
 ## Required inputs (from data-pipeline sample data)
 
-- `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv`
+- `weather/nasa-power-weather/examples/sample_weather_2fields_2020_2024.csv` (same schema as `daily_weather.csv`)
 - `soil/cdl-cropland/examples/sample_cdl_2_fields.csv`
 - `imagery/sentinel2-imagery/examples/sample_field_stats.csv`
 
