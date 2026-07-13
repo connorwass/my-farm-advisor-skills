@@ -273,7 +273,8 @@ This branch (`assignment-3`) adds the `field-year-storyline` subskill under
 for full documentation.
 
 **Quick summary:**
-- **Selected field:** OSM_1428284928 (CDL) / 271623002471299 (weather)
-- **Year:** 2024, crop: **Corn**
-- **Dashboard output:** `my-farm-advisor/field-year-storyline/output/field_year_storyline_OSM_1428284928_2024.png`
-- **All years:** 2020–2024 images generated for the same field
+- **Production field:** `osm-1360394834` (ia-grower, Iowa corn belt)
+- **Data sources:** Runtime `daily_weather.csv` (5 years), CDL composition tables,
+  Landsat NDVI extracted from scene rasters (4–9 dates/year)
+- **Dashboard output:** `my-farm-advisor/field-year-storyline/output/field_year_storyline_osm-1360394834_2024.png`
+- **All years:** 2021–2025 images generated from real production data

@@ -70,14 +70,14 @@ def load_weather(path: Path, field_id: str, year: int) -> pd.DataFrame:
     return df.sort_values("date").reset_index(drop=True)
 
 
-def load_ndvi_anchor(path: Path, field_id: str) -> tuple[int, float] | None:
+def load_ndvi_records(path: Path, field_id: str) -> pd.DataFrame:
     df = pd.read_csv(path)
-    row = df[df["field_id"] == field_id]
-    if row.empty:
-        return None
-    r = row.iloc[0]
-    date = pd.to_datetime(r["scene_date"])
-    return date.dayofyear, r["mean_ndvi"]
+    df = df[df["field_id"] == field_id].copy()
+    if df.empty:
+        return df
+    df["date"] = pd.to_datetime(df["scene_date"])
+    df["doy"] = df["date"].dt.dayofyear
+    return df.sort_values("doy").reset_index(drop=True)
 
 
 def compute_gdd(tmax: pd.Series, tmin: pd.Series, base: float = BASE_TEMP) -> pd.Series:
@@ -108,19 +108,23 @@ def detect_events(weather: pd.DataFrame) -> list[dict]:
     return sorted(events, key=lambda e: e["doy"])
 
 
-def generate_ndvi_curve(anchor_doy: int | None, anchor_value: float | None, doy_range: np.ndarray) -> np.ndarray:
+def generate_ndvi_curve(ndvi_records: pd.DataFrame, doy_range: np.ndarray) -> np.ndarray:
     doys, ndvis = zip(*CORN_NDVI_PHENOLOGY)
-    doys_list = list(doys)
-    ndvis_list = list(ndvis)
+    phenology_doys = list(doys)
+    phenology_ndvis = list(ndvis)
 
-    if anchor_doy is not None and anchor_value is not None:
-        if anchor_doy not in doys_list:
-            idx = np.searchsorted(doys_list, anchor_doy)
-            doys_list.insert(idx, anchor_doy)
-            ndvis_list.insert(idx, anchor_value)
+    if not ndvi_records.empty:
+        for _, r in ndvi_records.iterrows():
+            d = int(r["doy"])
+            v = float(r["mean_ndvi"])
+            if d not in phenology_doys:
+                idx = np.searchsorted(phenology_doys, d)
+                phenology_doys.insert(idx, d)
+                phenology_ndvis.insert(idx, v)
 
-    interp = PchipInterpolator(doys_list, ndvis_list)
-    return interp(doy_range)
+    interp = PchipInterpolator(phenology_doys, phenology_ndvis)
+    vals = interp(doy_range)
+    return np.clip(vals, 0.0, 1.0)
 
 
 def generate_captions(events: list[dict], ndvi_peak_doy: float, ndvi_peak_val: float, total_precip: float, total_gdd: float, crop: str) -> list[str]:
@@ -139,7 +143,7 @@ def _doy_to_date(doy: int | np.ndarray, year: int = 2024) -> np.datetime64 | np.
     return np.datetime64(f"{year}-01-01") + np.array(doy, dtype="timedelta64[D]") - 1
 
 
-def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.ndarray, events: list[dict], crop: str, field_id: str, year: int, weather_fid: str, output_path: Path):
+def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.ndarray, ndvi_records: pd.DataFrame, events: list[dict], crop: str, field_id: str, year: int, weather_fid: str, output_path: Path):
     dates = _doy_to_date(weather["doy"].values, year)
     gs_start_date = _doy_to_date(GS_START, year)
     gs_end_date = _doy_to_date(GS_END, year)
@@ -160,9 +164,10 @@ def plot_dashboard(weather: pd.DataFrame, ndvi_doy: np.ndarray, ndvi_vals: np.nd
     fig.suptitle(f"Field-Year Storyline: {field_id} — {year} ({crop})", fontsize=14, fontweight="bold", y=0.98)
 
     ax1 = axes[0]
-    ax1.plot(ndvi_dates, ndvi_vals, color="#16a34a", linewidth=2, label="NDVI (phenology model)")
-    anchor_date = _doy_to_date(170, year)
-    ax1.scatter([anchor_date], [0.78], color="#dc2626", s=50, zorder=5, label="Sample anchor (Jun 18)")
+    ax1.plot(ndvi_dates, ndvi_vals, color="#16a34a", linewidth=2, label="NDVI (interpolated)")
+    if not ndvi_records.empty:
+        obs_dates = _doy_to_date(ndvi_records["doy"].values, year)
+        ax1.scatter(obs_dates, ndvi_records["mean_ndvi"].values, color="#dc2626", s=40, zorder=5, label=f"Observed ({len(ndvi_records)} dates)")
     ax1.axvline(ndvi_peak_date, color="#16a34a", linestyle=":", alpha=0.5)
     ax1.annotate(f"Peak NDVI {ndvi_peak_val:.2f}", xy=(ndvi_peak_date, ndvi_peak_val),
                  xytext=(ndvi_peak_date + np.timedelta64(15, "D"), ndvi_peak_val - 0.12),
@@ -287,14 +292,17 @@ def main():
         sys.exit(1)
     print(f"Weather: {len(weather)} days loaded")
 
-    anchor = load_ndvi_anchor(ndvi_path, args.field)
-    if anchor:
-        print(f"NDVI anchor: DOY {anchor[0]}, mean_ndvi = {anchor[1]:.2f}")
+    ndvi_records = load_ndvi_records(ndvi_path, args.field)
+    if ndvi_records.empty:
+        print("NDVI records: not found, using uncalibrated phenology curve")
     else:
-        print("NDVI anchor: not found, using uncalibrated phenology curve")
+        print(f"NDVI records: {len(ndvi_records)} dates found")
+        for _, r in ndvi_records.iterrows():
+            src = r.get("source", "unknown")
+            print(f"  DOY {r['doy']} ({r['scene_date']}): mean_ndvi = {r['mean_ndvi']:.4f} [{src}]")
 
     doy_range = np.arange(GS_START, GS_END + 1)
-    ndvi_vals = generate_ndvi_curve(anchor[0] if anchor else None, anchor[1] if anchor else None, doy_range)
+    ndvi_vals = generate_ndvi_curve(ndvi_records, doy_range)
 
     events = detect_events(weather)
     print(f"Events detected: {len(events)}")
@@ -302,7 +310,7 @@ def main():
         print(f"  DOY {ev['doy']}: {ev['desc']}")
 
     output_path = output_dir / f"field_year_storyline_{args.field}_{args.year}.png"
-    plot_dashboard(weather, doy_range, ndvi_vals, events, crop, args.field, args.year, args.weather_field, output_path)
+    plot_dashboard(weather, doy_range, ndvi_vals, ndvi_records, events, crop, args.field, args.year, args.weather_field, output_path)
 
     print("\nSeason Captions:")
     total_precip = weather["PRECTOTCORR"].sum()
