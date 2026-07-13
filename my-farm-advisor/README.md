@@ -236,11 +236,16 @@ The umbrella entrypoint is [`SKILL.md`](SKILL.md). From there, the skill routes 
 | Admin            | Geospatial administration and interactive map workflows                | [`admin/INDEX.md`](admin/INDEX.md)                       |
 | Data Sources     | Canonical rebuilds, data pipelines, and farm intelligence reporting    | [`data-sources/INDEX.md`](data-sources/INDEX.md)         |
 | EDA              | Exploratory analysis, comparisons, correlations, and time-series views | [`eda/INDEX.md`](eda/INDEX.md)                           |
+| EDA (CDL/Weather/Boundary) | Field-boundary, weather, and CDL EDA with within-field, across-field, and across-grower comparisons | [`eda/eda-cdl-weather-boundary/GUIDE.md`](eda/eda-cdl-weather-boundary/GUIDE.md) |
 | Field Management | Boundaries, field sampling, and headlands workflows                    | [`field-management/INDEX.md`](field-management/INDEX.md) |
 | Imagery          | Landsat and Sentinel-2 workflows for vegetation and scene analysis     | [`imagery/INDEX.md`](imagery/INDEX.md)                   |
 | Soil             | SSURGO, poster-card outputs, and CDL-based soil/crop context           | [`soil/INDEX.md`](soil/INDEX.md)                         |
 | Strategy         | Crop strategy and maturity planning workflows                          | [`strategy/INDEX.md`](strategy/INDEX.md)                 |
 | Weather          | NASA POWER weather ingestion and downstream weather analysis           | [`weather/INDEX.md`](weather/INDEX.md)                   |
+
+## Exploratory Data Analysis Skill
+
+**`eda-cdl-weather-boundary`** (`eda/eda-cdl-weather-boundary/`) is a custom EDA skill that compares field boundaries, weather, and CDL crop composition across IA, IL, and NE growers. It generates 8 static outputs (PNG + CSV) and two HTML reports (`eda_report.html`, `field_boundary_maps.html`). All files are written to `${DATA_PIPELINE_DATA_ROOT}/data-pipeline/eda/eda-cdl-weather-boundary/output/`.
 
 ## Typical Workflow
 
