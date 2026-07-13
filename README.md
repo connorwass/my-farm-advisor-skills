@@ -14,6 +14,7 @@ The catalog is intentionally focused:
 | --- | --- | --- | --- |
 | 🌾 `my-farm-advisor` | [`my-farm-advisor/SKILL.md`](my-farm-advisor/SKILL.md) | Routes farm advisory work into field, soil, weather, imagery, EDA, strategy, admin, and data-pipeline workflows | Farm data rebuilds, field reports, geospatial context, agronomic analysis |
 | 🌱 `my-farm-breeding-trial-management` | [`my-farm-breeding-trial-management/SKILL.md`](my-farm-breeding-trial-management/SKILL.md) | Routes breeding operations into design, fieldbook, germplasm, selection, crossing, and field-trial placement examples | Breeding program execution and operational planning |
+| 📊 `field-year-storyline` | [`my-farm-advisor/field-year-storyline/SKILL.md`](my-farm-advisor/field-year-storyline/SKILL.md) | Generates aligned NDVI-weather-GDD dashboard for one field-year | Assignment 3 storyline dashboard |
 | 🧬 `my-farm-qtl-analysis` | [`my-farm-qtl-analysis/SKILL.md`](my-farm-qtl-analysis/SKILL.md) | Routes quantitative genetics work into mapping, QC, structure, prediction, and reporting examples | GWAS, eQTL, classical QTL, genomic prediction, and genetics reporting |
 
 ## How The Catalog Routes Work
@@ -77,6 +78,17 @@ flowchart LR
 | Germplasm | [`INDEX.md`](my-farm-breeding-trial-management/INDEX.md) | Accession, pedigree, mock breeding-system integrations |
 | Selection | [`INDEX.md`](my-farm-breeding-trial-management/INDEX.md) | Selection indexes, ranking, cycle simulation |
 | Crossing | [`INDEX.md`](my-farm-breeding-trial-management/INDEX.md) | Mate pairing and crossing plans |
+
+### 📊 My Farm Field-Year Storyline
+
+`my-farm-field-year-storyline` is a growing-season storyline dashboard skill.
+It selects a field and year from CDL tables, reads daily weather and Sentinel
+NDVI records, aligns them on a shared timeline, and produces a 4-panel
+dashboard with NDVI, precipitation, temperature/extremes, and cumulative GDD.
+
+| Area | Start here | What it does |
+| --- | --- | --- |
+| Storyline | [`field-year-storyline/GUIDE.md`](my-farm-advisor/field-year-storyline/GUIDE.md) | Generates field-year dashboard images with event annotations |
 
 ### 🧬 My Farm QTL Analysis
 
@@ -214,7 +226,16 @@ my-farm-advisor-skills/
 │   ├── INDEX.md
 │   ├── README.md
 │   ├── AGENTS.md
-│   └── ...
+│   ├── ...
+│   └── field-year-storyline/
+│       ├── SKILL.md
+│       ├── README.md
+│       ├── GUIDE.md
+│       ├── PROVENANCE.md
+│       ├── scripts/
+│       │   └── generate_storyline_dashboard.py
+│       └── output/
+│           └── field_year_storyline_OSM_1428284928_*.png
 ├── my-farm-breeding-trial-management/
 │   ├── SKILL.md
 │   ├── INDEX.md
@@ -237,6 +258,23 @@ my-farm-advisor-skills/
 | Update a farm workflow doc | Matching `my-farm-advisor/**/AGENTS.md` | `./scripts/validate.sh` plus local command if documented |
 | Route a breeding request | [`my-farm-breeding-trial-management/SKILL.md`](my-farm-breeding-trial-management/SKILL.md) | `./scripts/validate.sh` |
 | Route a QTL request | [`my-farm-qtl-analysis/SKILL.md`](my-farm-qtl-analysis/SKILL.md) | `./scripts/validate.sh` |
+| Generate a storyline dashboard | [`my-farm-advisor/field-year-storyline/GUIDE.md`](my-farm-advisor/field-year-storyline/GUIDE.md) | Run `generate_storyline_dashboard.py` with venv Python |
 | Change catalog structure | Root [`AGENTS.md`](AGENTS.md) and `scripts/validate.sh` | `bash -n scripts/validate.sh && ./scripts/validate.sh` |
 
 Keep edits focused, keep generated outputs out of Git, and route through the nearest `INDEX.md` before opening detailed workflow docs.
+
+---
+
+## Assignment 3 — Field-Year Storyline Dashboard
+
+This branch (`assignment-3`) adds the `field-year-storyline` subskill under
+`my-farm-advisor/`. See
+[`my-farm-advisor/field-year-storyline/README.md`](my-farm-advisor/field-year-storyline/README.md)
+for full documentation.
+
+**Quick summary:**
+- **Production field:** `osm-1360394834` (ia-grower, Iowa corn belt)
+- **Data sources:** Runtime `daily_weather.csv` (5 years), CDL composition tables,
+  Landsat NDVI extracted from scene rasters (4–9 dates/year)
+- **Dashboard output:** `my-farm-advisor/field-year-storyline/output/field_year_storyline_osm-1360394834_2024.png`
+- **All years:** 2021–2025 images generated from real production data
